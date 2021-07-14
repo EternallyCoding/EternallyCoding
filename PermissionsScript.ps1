@@ -1,12 +1,11 @@
-#It's not whether you win or... Okay, maybe it is..."
-#										-A. Hitler
-
-write-host "RUN AS MDADMINISTRATOR!!!" -foregroundcolor red
-$username = read-host -prompt 'username '
+write-host "Run as Administrator!" -foregroundcolor red
+$username = read-host -prompt 'Username '
+$Server = read-host -prompt "Location of server and share where User Folders are located in '\\Server\Share' format"
+$Administrator = read-host -prompt "Domain admin account in 'domain\administrator' format"
 
 Try  {
 
-  $Path = "\\10.37.1.23\users\$username"
+  $Path = "$Server\$username"
 
   #Start the job that will reset permissions for each file, don't even start if there are no direct sub-files
   $SubFiles = Get-ChildItem $Path 
@@ -40,42 +39,42 @@ Catch  {
 
 }
 
-$acl = Get-Acl \\10.37.1.23\users\$username
+$acl = Get-Acl $Server\$username
 
 $acl.SetAccessRuleProtection($true,$false)
 
-$usersid = New-Object System.Security.Principal.Ntaccount ('mddomain\mdadministrator')
+$usersid = New-Object System.Security.Principal.Ntaccount ($Administrator)
 
 $acl.SetOwner($usersid)
 
 
 
-$acl = Get-Acl -Path "\\10.37.1.23\users\$username"
+$acl = Get-Acl -Path "$Server\$username"
 $acl.SetAccessRuleProtection($true,$false)
 $acl.Access | ForEach-Object { $acl.RemoveAccessRule($_) | Out-Null }
 $ace = New-Object System.Security.Accesscontrol.FileSystemAccessRule ($username,"modify","Allow")
 
 $acl.AddAccessRule($ace)
-Set-Acl -Path "\\10.37.1.23\users\$username" -AclObject $acl
+Set-Acl -Path "$Server\$username" -AclObject $acl
 
-$AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("mddomain\mdadministrator","FullControl","Allow")
+$AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($Administrator,"FullControl","Allow")
 
 $acl.SetAccessRule($AccessRule)
 
-$acl | Set-Acl \\10.37.1.23\users\$username
+$acl | Set-Acl $Server\$username
 
-$ace = New-Object System.Security.Accesscontrol.FileSystemAccessRule ("mddomain\mdadministrator", "FullControl", "ContainerInherit,ObjectInherit", "InheritOnly", "Allow")
+$ace = New-Object System.Security.Accesscontrol.FileSystemAccessRule ($Administrator, "FullControl", "ContainerInherit,ObjectInherit", "InheritOnly", "Allow")
 $acl.AddAccessRule($ace)
 
 $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("$username","modify","Allow")
 
 $acl.SetAccessRule($AccessRule)
 
-$acl | Set-Acl \\10.37.1.23\users\$username
+$acl | Set-Acl $Share\$username
 
 $ace = New-Object System.Security.Accesscontrol.FileSystemAccessRule ("$username", "modify", "ContainerInherit,ObjectInherit", "InheritOnly", "Allow")
 $acl.AddAccessRule($ace)
 
-Set-Acl -Path "\\10.37.1.23\users\$username" -AclObject $acl
+Set-Acl -Path $Server\$username -AclObject $acl
 write-host "Process has completed!" -foregroundcolor green
 start-sleep 10
