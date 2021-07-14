@@ -70,7 +70,7 @@ $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("$us
 
 $acl.SetAccessRule($AccessRule)
 
-$acl | Set-Acl $Share\$username
+$acl | Set-Acl -Path "$Server\$username"
 
 $ace = New-Object System.Security.Accesscontrol.FileSystemAccessRule ("$username", "modify", "ContainerInherit,ObjectInherit", "InheritOnly", "Allow")
 $acl.AddAccessRule($ace)
