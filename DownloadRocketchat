@@ -1,0 +1,14 @@
+#!/bin/bash
+
+RCLocation=/Location/to/store/Rocketchat/installers
+RCVersion="$(curl https://github.com/RocketChat/Rocket.Chat.Electron/releases | grep .dmg | head -1 | cut -d '"' -f 2 | cut -d '/' -f 6)" 
+if [ -e ${RCLocation}rocketchat-${RCVersion}-mac.dmg ] 
+then
+	echo "Already exists"
+else
+	echo "Moving old files"
+	mv ${RCLocation}rocketchat* ${RCLocation}/old
+	wget -P ${RCLocation} https://github.com/RocketChat/Rocket.Chat.Electron/releases/download/${RCVersion}/rocketchat-${RCVersion}-linux-amd64.deb
+	wget -P ${RCLocation} https://github.com/RocketChat/Rocket.Chat.Electron/releases/download/${RCVersion}/rocketchat-${RCVersion}-mac.dmg
+	wget -P ${RCLocation} https://github.com/RocketChat/Rocket.Chat.Electron/releases/download/${RCVersion}/rocketchat-${RCVersion}-win-x64.msi
+fi
