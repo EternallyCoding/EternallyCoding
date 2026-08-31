@@ -1,0 +1,1 @@
+Get-WinEvent -ListLog Microsoft-Windows-PrintService/Operational | Foreach-Object {Get-WinEvent -LogName $_.LogName -ErrorAction SilentlyContinue} | Where-Object ID -EQ "307" | Export-Csv -Path .\Documents\printjobs123 -NoTypeInformation
